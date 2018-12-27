@@ -42,7 +42,7 @@ public class RegisterMonitor {
                             registerMap.remove(key);
                         } else {
                             if ((System.currentTimeMillis() - register.createTime()) > register.timeout()) {
-                                LOGGER.info("checked there is a register not triggered. the uniqueId is: [{}]", key);
+                                LOGGER.error("checked there is a register not triggered. the uniqueId is: [{}]", key);
                                 //registerMap.remove(key);
                             }
                         }
@@ -53,8 +53,7 @@ public class RegisterMonitor {
     }
 
     public void register(String uniqueId, AbstractAsyncHookRegister register) {
-        if (uniqueId != null && register != null
-                && register.onSuccess() != null && register.onTimeout() != null) {
+        if (uniqueId != null && register != null) {
             registerMap.put(uniqueId, register);
         }
     }
