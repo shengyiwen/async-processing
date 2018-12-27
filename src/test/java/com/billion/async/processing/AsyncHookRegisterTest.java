@@ -30,9 +30,6 @@ public class AsyncHookRegisterTest {
             @Override
             public void run() {
                 System.out.println(" ============ i'm timeout !!! =================== ");
-                synchronized (AsyncHookRegisterTest.class) {
-                    AsyncHookRegisterTest.class.notify();
-                }
             }
         }));
     }
@@ -45,7 +42,7 @@ public class AsyncHookRegisterTest {
     @Test
     public void registerSuccess() throws InterruptedException {
         register.registerHook("123456");
-        Thread.sleep(5000L);
+        Thread.sleep(4500L);
         register.trigger("123456");
         synchronized (AsyncHookRegisterTest.class) {
             AsyncHookRegisterTest.class.wait();

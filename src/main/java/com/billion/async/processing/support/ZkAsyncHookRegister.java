@@ -99,7 +99,7 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
                                         lock.wait(waitTime.get());
                                     }
                                 } catch (InterruptedException e) {
-                                    //do nothing
+                                    LOGGER.error("register hook error.", e);
                                 }
 
                                 if (!getCurrentState().isInit()) {
@@ -139,10 +139,12 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
      * @param uniqueId 唯一标识
      */
     private void complete(String uniqueId) {
-        setCurrentState(AsyncHookRegisterState.COMPLETED);
-        onSuccess().start();
-        if (client.exist(uniqueId)) {
-            client.delete(uniqueId);
+        synchronized (lock) {
+            setCurrentState(AsyncHookRegisterState.COMPLETED);
+            onSuccess().start();
+            if (client.exist(uniqueId)) {
+                client.delete(uniqueId);
+            }
         }
     }
 
@@ -155,10 +157,12 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
      * @param uniqueId 唯一标识
      */
     private void cancel(String uniqueId) {
-        setCurrentState(AsyncHookRegisterState.CANCELED);
-        onTimeout().start();
-        if (this.client.exist(uniqueId)) {
-            this.client.delete(uniqueId);
+        synchronized (lock) {
+            setCurrentState(AsyncHookRegisterState.CANCELED);
+            onTimeout().start();
+            if (this.client.exist(uniqueId)) {
+                this.client.delete(uniqueId);
+            }
         }
     }
 
