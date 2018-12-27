@@ -1,5 +1,7 @@
 package com.billion.async.processing;
 
+import com.billion.async.processing.monitor.RegisterMonitor;
+
 /**
  * @author asheng
  * @since 2018/12/27
@@ -21,7 +23,8 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
     /**
      * 当前注册回调的状态
      *
-     * {@link AsyncHookRegisterState#CREATED}   刚被创建状态
+     * {@link AsyncHookRegisterState#CREATED}   刚被创建状态，可以注册回调任务
+     * {@link AsyncHookRegisterState#READY}     准备状态，不能注册回调任务
      * {@link AsyncHookRegisterState#COMPLETED} 成功线程被回调的状态
      * {@link AsyncHookRegisterState#CANCELED}  超时线程被回调的状态
      */
@@ -59,6 +62,31 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
         return this.timeout;
     }
 
+    public long createTime() {
+        return this.createTime;
+    }
+
+    @Override
+    public void registerHook(String uniqueId) {
+        if (onSuccess() == null) {
+            throw new RuntimeException("successThread is null.");
+        }
+
+        if (timeout > 0 && onTimeout() == null) {
+            throw new RuntimeException("timeoutThread is null.");
+        }
+
+        if (!getCurrentState().isInit()) {
+            throw new RuntimeException("the register only can be used once");
+        }
+
+        setCurrentState(AsyncHookRegisterState.READY);
+        RegisterMonitor.getInstance().register(uniqueId, this);
+        register(uniqueId);
+    }
+
+    protected abstract void register(String uniqueId);
+
     /**
      * 修改当前状态，线程安全
      *
@@ -73,7 +101,7 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
      *
      * @return 当前系统状态
      */
-    protected synchronized AsyncHookRegisterState getCurrentState() {
+    public synchronized AsyncHookRegisterState getCurrentState() {
         return this.currentState;
     }
 

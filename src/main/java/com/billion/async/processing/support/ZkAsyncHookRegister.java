@@ -43,6 +43,7 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
         this.client = client;
     }
 
+
     /**
      * 注册一个服务到zk
      * 1.如果超时时间 <= 0 的话，此任务将会一直等待，直到被回调
@@ -55,21 +56,13 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
      * @param uniqueId  唯一标识
      */
     @Override
-    public void registerHook(final String uniqueId) {
-        if (onSuccess() == null) {
-            throw new RuntimeException("successThread is null.");
-        }
-
-        if (timeout > 0 && onTimeout() == null) {
-            throw new RuntimeException("timeoutThread is null.");
-        }
-
+    protected void register(final String uniqueId) {
         client.create(uniqueId, false);
         if (timeout <= 0) {
             client.subscribe(uniqueId, new IDataListener() {
                 @Override
                 public void onSubscribe(int state) {
-                    if (state == IDataListener.NODE_DELETED && getCurrentState().isInit()) {
+                    if (state == IDataListener.NODE_DELETED && getCurrentState().isReady()) {
                         complete(uniqueId);
                     }
                 }
@@ -79,7 +72,7 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
                 @Override
                 public void onSubscribe(int state) {
                     synchronized (lock) {
-                        if (state == IDataListener.NODE_DELETED && getCurrentState().isInit()) {
+                        if (state == IDataListener.NODE_DELETED && getCurrentState().isReady()) {
                             complete(uniqueId);
                             lock.notify();
                         }
@@ -102,13 +95,13 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
                                     LOGGER.error("register hook error.", e);
                                 }
 
-                                if (!getCurrentState().isInit()) {
+                                if (!getCurrentState().isReady()) {
                                     break;
                                 }
 
                                 waitTime.set(timeout - (System.currentTimeMillis() - createTime));
                                 if (waitTime.get() <= 0) {
-                                    if (getCurrentState().isInit()) {
+                                    if (getCurrentState().isReady()) {
                                         cancel(uniqueId);
                                     }
                                     break;
@@ -118,7 +111,9 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
                     }
                 }).start();
             } else {
-                cancel(uniqueId);
+                if (getCurrentState().isReady()) {
+                    cancel(uniqueId);
+                }
             }
         }
     }
