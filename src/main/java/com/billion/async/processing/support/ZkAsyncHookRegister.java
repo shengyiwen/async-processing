@@ -65,7 +65,6 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
                     synchronized (lock) {
                         if (state == IDataListener.NODE_DELETED && getCurrentState().isReady()) {
                             complete(uniqueId);
-                            lock.notify();
                         }
                     }
                 }
@@ -113,6 +112,9 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
     protected void finish(String uniqueId) {
         if (client.exist(uniqueId)) {
             client.delete(uniqueId);
+        }
+        synchronized (lock) {
+            lock.notifyAll();
         }
     }
 

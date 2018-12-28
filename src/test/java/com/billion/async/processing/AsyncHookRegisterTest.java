@@ -41,7 +41,7 @@ public class AsyncHookRegisterTest {
     @Test
     public void registerSuccess() throws InterruptedException {
         register.registerHook("123456");
-        Thread.sleep(4800L);
+        Thread.sleep(5000L);
         zkClient.delete("123456");
         synchronized (AsyncHookRegisterTest.class) {
             AsyncHookRegisterTest.class.wait();
