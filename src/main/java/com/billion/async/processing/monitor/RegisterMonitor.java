@@ -1,6 +1,7 @@
 package com.billion.async.processing.monitor;
 
 import com.billion.async.processing.AbstractAsyncHookRegister;
+import com.billion.async.processing.executor.AsyncThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,8 @@ public class RegisterMonitor {
     }
 
     private RegisterMonitor() {
-        executorService = Executors.newScheduledThreadPool(1);
+        executorService = Executors.newScheduledThreadPool(1,
+                new AsyncThreadFactory(AsyncThreadFactory.THREAD_PREFIX + "-monitor"));
         registerMap = new ConcurrentHashMap<>();
         initTask();
     }

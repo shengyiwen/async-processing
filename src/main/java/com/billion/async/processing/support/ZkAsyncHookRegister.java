@@ -1,6 +1,7 @@
 package com.billion.async.processing.support;
 
 import com.billion.async.processing.AbstractAsyncHookRegister;
+import com.billion.async.processing.executor.AsyncExecutorService;
 import com.billion.async.processing.zookeeper.IDataListener;
 import com.billion.async.processing.zookeeper.ZookeeperClient;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
 
             final AtomicLong waitTime = new AtomicLong(timeout - (System.currentTimeMillis() - createTime));
             if (waitTime.get() > 0) {
-                new Thread(new Runnable() {
+                AsyncExecutorService.getInstance().submit(new Runnable() {
                     @Override
                     public void run() {
                         if (waitTime.get() > 0) {
@@ -99,7 +100,7 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
                             }
                         }
                     }
-                }).start();
+                });
             } else {
                 if (getCurrentState().isReady()) {
                     cancel(uniqueId);
