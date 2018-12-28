@@ -119,45 +119,18 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
     }
 
     @Override
+    protected void finish(String uniqueId) {
+        deleteNode(uniqueId);
+    }
+
+    @Override
     public void trigger(String uniqueId) {
-        if (client.exist(uniqueId)) {
-            client.delete(uniqueId);
-        }
+        deleteNode(uniqueId);
     }
 
-    /**
-     * 成功被回调
-     * 1.修改状态为完成
-     * 2.调用成功线程
-     * 3.如果节点存在，删除节点
-     *
-     * @param uniqueId 唯一标识
-     */
-    private void complete(String uniqueId) {
-        synchronized (lock) {
-            setCurrentState(AsyncHookRegisterState.COMPLETED);
-            onSuccess().start();
-            if (client.exist(uniqueId)) {
-                client.delete(uniqueId);
-            }
-        }
-    }
-
-    /**
-     * 超时被回调
-     * 1.状态置为取消
-     * 2.调用超时线程
-     * 3.如果节点存在，删除节点
-     *
-     * @param uniqueId 唯一标识
-     */
-    private void cancel(String uniqueId) {
-        synchronized (lock) {
-            setCurrentState(AsyncHookRegisterState.CANCELED);
-            onTimeout().start();
-            if (this.client.exist(uniqueId)) {
-                this.client.delete(uniqueId);
-            }
+    private void deleteNode(String path) {
+        if (client.exist(path)) {
+            client.delete(path);
         }
     }
 

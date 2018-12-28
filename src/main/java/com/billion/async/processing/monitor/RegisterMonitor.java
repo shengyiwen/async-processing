@@ -15,9 +15,9 @@ public class RegisterMonitor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegisterMonitor.class);
 
-    private ConcurrentMap<String, AbstractAsyncHookRegister> registerMap = new ConcurrentHashMap<>();
+    private static final RegisterMonitor INSTANCE = new RegisterMonitor();
 
-    private static RegisterMonitor INSTANCE = new RegisterMonitor();
+    private final ConcurrentMap<String, AbstractAsyncHookRegister> registerMap;
 
     private final ScheduledExecutorService executorService;
 
@@ -27,6 +27,7 @@ public class RegisterMonitor {
 
     private RegisterMonitor() {
         executorService = Executors.newScheduledThreadPool(1);
+        registerMap = new ConcurrentHashMap<>();
         initTask();
     }
 

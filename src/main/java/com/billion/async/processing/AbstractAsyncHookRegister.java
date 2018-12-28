@@ -105,4 +105,36 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
         return this.currentState;
     }
 
+    /**
+     * 成功被回调
+     * 1.修改状态为完成
+     * 2.调用成功线程
+     *
+     * @param uniqueId 唯一标识
+     */
+    protected synchronized void complete(String uniqueId) {
+        setCurrentState(AsyncHookRegisterState.COMPLETED);
+        onSuccess().start();
+        finish(uniqueId);
+    }
+
+    /**
+     * 超时被回调
+     * 1.状态置为取消
+     * 2.调用超时线程
+     *
+     * @param uniqueId 唯一标识
+     */
+    protected synchronized void cancel(String uniqueId) {
+        setCurrentState(AsyncHookRegisterState.CANCELED);
+        onTimeout().start();
+        finish(uniqueId);
+    }
+
+    /**
+     * 用于自定义了尾工作
+     *
+     * @param uniqueId 唯一标识
+     */
+    protected abstract void finish(String uniqueId);
 }
