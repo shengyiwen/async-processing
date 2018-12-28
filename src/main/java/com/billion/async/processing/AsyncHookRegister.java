@@ -37,11 +37,4 @@ public interface AsyncHookRegister {
      * @return {@link Thread}
      */
     Thread onTimeout();
-
-    /**
-     * 用于储发成功回调
-     *
-     * @param uniqueId 唯一标识
-     */
-    void trigger(String uniqueId);
 }

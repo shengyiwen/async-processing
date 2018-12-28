@@ -12,7 +12,7 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
     protected final long timeout;
 
     /** 创建时间，用于做超时判断 */
-    protected final long createTime;
+    protected long createTime;
 
     /** 成功回调线程 */
     private final Thread successThread;
@@ -30,21 +30,11 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
      */
     private AsyncHookRegisterState currentState;
 
-    /**
-     * 使用此构造方法，不能调用注册方法{@link this#registerHook(String)}
-     * 否则会抛出NullPointException
-     * 此方法是为了完成触发完成动作的，即{@link this#trigger(String)}
-     */
-    public AbstractAsyncHookRegister() {
-        this(0L, null, null);
-    }
-
     public AbstractAsyncHookRegister(long timeout, Thread successThread, Thread timeoutThread) {
         this.timeout = timeout;
         this.successThread = successThread;
         this.timeoutThread = timeoutThread;
         this.currentState = AsyncHookRegisterState.CREATED;
-        this.createTime = System.currentTimeMillis();
     }
 
     @Override
@@ -82,6 +72,7 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
 
         setCurrentState(AsyncHookRegisterState.READY);
         RegisterMonitor.getInstance().register(uniqueId, this);
+        this.createTime = System.currentTimeMillis();
         register(uniqueId);
     }
 

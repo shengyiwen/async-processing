@@ -12,12 +12,11 @@ import org.junit.Test;
  */
 public class AsyncHookRegisterTest {
 
-
     private AsyncHookRegister register;
+    private ZookeeperClient zkClient = new ZkclientZookeeperClient("localhost:2181");
 
     @Before
     public void setUp() {
-        ZookeeperClient zkClient = new ZkclientZookeeperClient("localhost:2181");
         register = new ZkAsyncHookRegister(zkClient, 5000L, new Thread(new Runnable() {
             @Override
             public void run() {
@@ -43,7 +42,7 @@ public class AsyncHookRegisterTest {
     public void registerSuccess() throws InterruptedException {
         register.registerHook("123456");
         Thread.sleep(4800L);
-        register.trigger("123456");
+        zkClient.delete("123456");
         synchronized (AsyncHookRegisterTest.class) {
             AsyncHookRegisterTest.class.wait();
         }

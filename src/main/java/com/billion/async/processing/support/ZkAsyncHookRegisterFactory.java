@@ -25,16 +25,6 @@ public class ZkAsyncHookRegisterFactory implements AsyncHookRegisterFactory {
     }
 
     /**
-     * 构建只能用于触发的注册中心
-     *
-     * @return {@link ZkAsyncHookRegister}
-     */
-    @Override
-    public ZkAsyncHookRegister build() {
-        return new ZkAsyncHookRegister(client);
-    }
-
-    /**
      * 构建注册中心
      *
      * @return {@link ZkAsyncHookRegister}

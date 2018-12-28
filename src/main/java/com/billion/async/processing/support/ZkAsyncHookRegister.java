@@ -1,7 +1,6 @@
 package com.billion.async.processing.support;
 
 import com.billion.async.processing.AbstractAsyncHookRegister;
-import com.billion.async.processing.AsyncHookRegisterState;
 import com.billion.async.processing.zookeeper.IDataListener;
 import com.billion.async.processing.zookeeper.ZookeeperClient;
 import org.slf4j.Logger;
@@ -25,15 +24,6 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
 
     /** 锁服务 */
     private final Object lock = new Object();
-
-    /**
-     * 使用此构造方法，不能调用注册方法{@link this#registerHook(String)}
-     * 否则会抛出NullPointException
-     * 此方法是为了完成触发完成动作的，即{@link this#trigger(String)}
-     */
-    public ZkAsyncHookRegister(ZookeeperClient client) {
-        this(client, 0L, null, null);
-    }
 
     public ZkAsyncHookRegister(ZookeeperClient client, long timeout, Thread successThread, Thread timeoutThread) {
         super(timeout, successThread, timeoutThread);
@@ -120,17 +110,8 @@ public class ZkAsyncHookRegister extends AbstractAsyncHookRegister {
 
     @Override
     protected void finish(String uniqueId) {
-        deleteNode(uniqueId);
-    }
-
-    @Override
-    public void trigger(String uniqueId) {
-        deleteNode(uniqueId);
-    }
-
-    private void deleteNode(String path) {
-        if (client.exist(path)) {
-            client.delete(path);
+        if (client.exist(uniqueId)) {
+            client.delete(uniqueId);
         }
     }
 

@@ -10,8 +10,6 @@ package com.billion.async.processing;
  */
 public interface AsyncHookRegisterFactory {
 
-    AsyncHookRegister build();
-
     AsyncHookRegister build(long timeout, Thread successThread, Thread timeoutThread);
 
 }
