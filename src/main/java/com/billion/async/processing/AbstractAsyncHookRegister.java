@@ -23,18 +23,18 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
     /**
      * 当前注册回调的状态
      *
-     * {@link AsyncHookRegisterState#CREATED}   刚被创建状态，可以注册回调任务
-     * {@link AsyncHookRegisterState#READY}     准备状态，不能注册回调任务
-     * {@link AsyncHookRegisterState#COMPLETED} 成功线程被回调的状态
-     * {@link AsyncHookRegisterState#CANCELED}  超时线程被回调的状态
+     * {@link HookRegisterState#CREATED}   刚被创建状态，可以注册回调任务
+     * {@link HookRegisterState#READY}     准备状态，不能注册回调任务
+     * {@link HookRegisterState#COMPLETED} 成功线程被回调的状态
+     * {@link HookRegisterState#CANCELED}  超时线程被回调的状态
      */
-    private AsyncHookRegisterState currentState;
+    private HookRegisterState currentState;
 
     public AbstractAsyncHookRegister(long timeout, Thread successThread, Thread timeoutThread) {
         this.timeout = timeout;
         this.successThread = successThread;
         this.timeoutThread = timeoutThread;
-        this.currentState = AsyncHookRegisterState.CREATED;
+        this.currentState = HookRegisterState.CREATED;
     }
 
     @Override
@@ -70,7 +70,7 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
             throw new RuntimeException("the register only can be used once");
         }
 
-        setCurrentState(AsyncHookRegisterState.READY);
+        setCurrentState(HookRegisterState.READY);
         RegisterMonitor.getInstance().register(uniqueId, this);
         this.createTime = System.currentTimeMillis();
         register(uniqueId);
@@ -83,7 +83,7 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
      *
      * @param state 即将修改的状态
      */
-    protected synchronized void setCurrentState(AsyncHookRegisterState state) {
+    protected synchronized void setCurrentState(HookRegisterState state) {
         this.currentState = state;
     }
 
@@ -92,7 +92,7 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
      *
      * @return 当前系统状态
      */
-    public synchronized AsyncHookRegisterState getCurrentState() {
+    public synchronized HookRegisterState getCurrentState() {
         return this.currentState;
     }
 
@@ -104,7 +104,7 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
      * @param uniqueId 唯一标识
      */
     protected synchronized void complete(String uniqueId) {
-        setCurrentState(AsyncHookRegisterState.COMPLETED);
+        setCurrentState(HookRegisterState.COMPLETED);
         onSuccess().start();
         finish(uniqueId);
     }
@@ -117,7 +117,7 @@ public abstract class AbstractAsyncHookRegister implements AsyncHookRegister {
      * @param uniqueId 唯一标识
      */
     protected synchronized void cancel(String uniqueId) {
-        setCurrentState(AsyncHookRegisterState.CANCELED);
+        setCurrentState(HookRegisterState.CANCELED);
         onTimeout().start();
         finish(uniqueId);
     }

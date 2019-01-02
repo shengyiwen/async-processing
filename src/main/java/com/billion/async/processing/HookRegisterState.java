@@ -4,7 +4,7 @@ package com.billion.async.processing;
  * @author asheng
  * @since 2018/12/27
  */
-public enum AsyncHookRegisterState {
+public enum HookRegisterState {
 
     /** 创建状态 */
     CREATED {
